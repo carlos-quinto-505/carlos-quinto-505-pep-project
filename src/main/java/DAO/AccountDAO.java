@@ -1,7 +1,6 @@
 package DAO;
 
 import Model.Account;
-import Model.Message;
 import Util.ConnectionUtil;
 
 import java.sql.*;
@@ -9,15 +8,39 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Provides methods used for all database-related functions, such as querying existing records and inserting new records.
+ * Provides methods used for all database-related functions, such as querying existing accounts and inserting new accounts.
  * @author C. Quinto
  */
-
 public class AccountDAO {
+    /**
+     * Retrieve existing accounts that match a provided id.
+     * @param id integer used to complete the SQL id query.
+     * @return an Account.
+     */
+    public Account getAccountById(int id) {
+        Connection connection = ConnectionUtil.getConnection();
+        List<Account> accounts = new ArrayList<>();
+
+        try {
+            String sql = "SELECT * FROM account WHERE account_id=?;";
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setInt(1, id);
+
+            ResultSet results = statement.executeQuery();
+            accounts = accountQueryResultsBuilder(results);
+
+            if (accounts.isEmpty()) return null;
+            else return accounts.get(0);
+        } catch (SQLException e) {
+            System.out.println("SQL exception occurred: " + e.getMessage());
+        }
+        return null;
+    }
+
     /**
      * Retrieve existing accounts that match a provided username.
      * @param username String used to complete the SQL username query.
-     * @return A List of Account objects.
+     * @return an Account.
      */
     public Account getAccountByUsername(String username) {
         Connection connection = ConnectionUtil.getConnection();
@@ -36,7 +59,6 @@ public class AccountDAO {
         } catch (SQLException e) {
             System.out.println("SQL exception occurred: " + e.getMessage());
         }
-
         return null;
     }
 
@@ -44,7 +66,7 @@ public class AccountDAO {
      * Retrieve existing accounts that match a provided username and password.
      * @param username String used to complete the SQL username query.
      * @param password String used to complete the SQL password query.
-     * @return A List of Account objects.
+     * @return an Account.
      */
     public Account getAccountByUsernameAndPassword(String username, String password) {
         Connection connection = ConnectionUtil.getConnection();
@@ -64,7 +86,6 @@ public class AccountDAO {
         } catch (SQLException e) {
             System.out.println("SQL exception occurred: " + e.getMessage());
         }
-
         return null;
     }
     
@@ -72,30 +93,38 @@ public class AccountDAO {
      * Insert a new entry into the account table.
      * @param username String value for the data username field.
      * @param password String value for the data password field.
+     * @return the processed Account.
      */
-    public Account insertNewAccount(String username, String password) {
+    public Account insertAccount(String username, String password) {
         Connection connection = ConnectionUtil.getConnection();
 
         try {
             String sql = "INSERT INTO account (username, password) VALUES (?, ?);" ;
-            PreparedStatement statement = connection.prepareStatement(sql);
+            PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             
             statement.setString(1, username);
             statement.setString(2, password);
             statement.executeUpdate();
-            
-            return new Account(username, password);
+
+            ResultSet generatedKeys = statement.getGeneratedKeys();
+
+            if (generatedKeys.next()) {
+                return new Account(
+                    generatedKeys.getInt(1),
+                    username,
+                    password
+                );
+            } else throw new SQLException("Record insertion failed.");
         } catch (SQLException e) {
             System.out.println("SQL exception occurred: " + e.getMessage());
         }
-
         return null;
     }
 
     /**
-     * Processes query results into Java Accounts and populates their fields.
+     * Processes query results into Accounts and populates their fields.
      * @param results ResultSet from a query.
-     * @return A list of Account objects.
+     * @return A list of Accounts.
      * @throws SQLException Exception handling should occur in parent method.
      */
     private List<Account> accountQueryResultsBuilder(ResultSet results) throws SQLException{
