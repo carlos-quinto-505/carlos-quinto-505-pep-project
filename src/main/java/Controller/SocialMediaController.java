@@ -18,8 +18,7 @@ import Model.Message;
 public class SocialMediaController {
     AccountService accountService = new AccountService();
     /**
-     * In order for the test cases to work, you will need to write the endpoints in the startAPI() method, as the test
-     * suite must receive a Javalin object from this method.
+     * Javalin endpoints and app start.
      * @return a Javalin app object which defines the behavior of the Javalin controller.
      */
     public Javalin startAPI() {
@@ -45,7 +44,7 @@ public class SocialMediaController {
     }
 
     /**
-     * Handle GET calls to the login end point.
+     * Handle POST calls to the login end point.
      * @param context context object managing HTTP request and response.
      */
     private void postLoginHandler(Context context) throws JsonProcessingException {
