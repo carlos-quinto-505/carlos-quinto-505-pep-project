@@ -16,7 +16,7 @@ import Model.Message;
  * refer to prior mini-project labs and lecture materials for guidance on how a controller may be built.
  */
 public class SocialMediaController {
-    AccountService service = new AccountService();
+    AccountService accountService = new AccountService();
     /**
      * In order for the test cases to work, you will need to write the endpoints in the startAPI() method, as the test
      * suite must receive a Javalin object from this method.
@@ -25,7 +25,7 @@ public class SocialMediaController {
     public Javalin startAPI() {
         Javalin app = Javalin.create();
         app.post("/register", this::postRegistrationHandler);
-        app.get("/login", this::getLoginHandler);
+        app.post("/login", this::postLoginHandler);
         return app;
     }
 
@@ -36,10 +36,11 @@ public class SocialMediaController {
     private void postRegistrationHandler(Context context) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         Account userAccount = mapper.readValue(context.body(), Account.class);
-        Account newAccount = service.addAccount(userAccount);
+        Account newAccount = accountService.addAccount(userAccount);
 
         if (newAccount != null) {
-            context.status(200).json(mapper.writeValueAsString(newAccount));
+            Account queryAccount = accountService.getAccountByUsername(newAccount);
+            context.status(200).json(mapper.writeValueAsString(queryAccount));
         } else context.status(400);
     }
 
@@ -47,8 +48,13 @@ public class SocialMediaController {
      * Handle GET calls to the login end point.
      * @param context context object managing HTTP request and response.
      */
-    private void getLoginHandler(Context context) {
+    private void postLoginHandler(Context context) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        Account userAccount = mapper.readValue(context.body(), Account.class);
+        Account target = accountService.getAccountByUsernameAndPassword(userAccount);
 
+        if(target != null) context.status(200).json(mapper.writeValueAsString(target));
+        else context.status(401);
     }
 
 }

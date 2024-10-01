@@ -29,16 +29,35 @@ public class AccountDAO {
             statement.setString(1, username);
 
             ResultSet results = statement.executeQuery();
+            accounts = accountQueryResultsBuilder(results);
 
-            while (results.next()) {
-                Account objAccount = new Account(
-                    results.getInt("account_id"),
-                    results.getString("username"),
-                    results.getString("password")
-                );
-                accounts.add(objAccount);
+            if (accounts.isEmpty()) return null;
+            else return accounts.get(0);
+        } catch (SQLException e) {
+            System.out.println("SQL exception occurred: " + e.getMessage());
+        }
 
-            }
+        return null;
+    }
+
+    /**
+     * Retrieve existing accounts that match a provided username and password.
+     * @param username String used to complete the SQL username query.
+     * @param password String used to complete the SQL password query.
+     * @return A List of Account objects.
+     */
+    public Account getAccountByUsernameAndPassword(String username, String password) {
+        Connection connection = ConnectionUtil.getConnection();
+        List<Account> accounts = new ArrayList<>();
+
+        try {
+            String sql = "SELECT * FROM account WHERE username=? AND password=?;";
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setString(1, username);
+            statement.setString(2, password);
+
+            ResultSet results = statement.executeQuery();
+            accounts = accountQueryResultsBuilder(results);
 
             if (accounts.isEmpty()) return null;
             else return accounts.get(0);
@@ -58,7 +77,6 @@ public class AccountDAO {
         Connection connection = ConnectionUtil.getConnection();
 
         try {
-            Account objProspect = new Account();
             String sql = "INSERT INTO account (username, password) VALUES (?, ?);" ;
             PreparedStatement statement = connection.prepareStatement(sql);
             
@@ -66,12 +84,25 @@ public class AccountDAO {
             statement.setString(2, password);
             statement.executeUpdate();
             
-            objProspect = getAccountByUsername(username);
-            return objProspect;
+            return new Account(username, password);
         } catch (SQLException e) {
             System.out.println("SQL exception occurred: " + e.getMessage());
         }
 
         return null;
+    }
+
+    private List<Account> accountQueryResultsBuilder(ResultSet results) throws SQLException{
+        List<Account> targets = new ArrayList<>();
+
+        while (results.next()) {
+            Account objAccount = new Account(
+                results.getInt("account_id"),
+                results.getString("username"),
+                results.getString("password")
+            );
+            targets.add(objAccount);
+        }
+        return targets;
     }
 }

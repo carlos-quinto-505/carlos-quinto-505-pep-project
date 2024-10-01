@@ -26,6 +26,14 @@ public class AccountService {
         else return null;
     }
 
+    public Account getAccountByUsername(Account target) {
+        return socialMediaDAO.getAccountByUsername(target.getUsername());
+    }
+
+    public Account getAccountByUsernameAndPassword(Account target) {
+        return socialMediaDAO.getAccountByUsernameAndPassword(target.getUsername(), target.getPassword());
+    }
+
     private boolean passwordVerify(String password) {
         // Minimum character count
         int minCharCount = 4;
