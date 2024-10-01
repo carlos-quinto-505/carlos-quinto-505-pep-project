@@ -92,6 +92,12 @@ public class AccountDAO {
         return null;
     }
 
+    /**
+     * Processes query results into Java Accounts and populates their fields.
+     * @param results ResultSet from a query.
+     * @return A list of Account objects.
+     * @throws SQLException Exception handling should occur in parent method.
+     */
     private List<Account> accountQueryResultsBuilder(ResultSet results) throws SQLException{
         List<Account> targets = new ArrayList<>();
 
