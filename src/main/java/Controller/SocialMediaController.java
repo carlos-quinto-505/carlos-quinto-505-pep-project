@@ -29,7 +29,9 @@ public class SocialMediaController {
         app.post("/register", this::postRegistrationHandler);
         app.post("/login", this::postLoginHandler);
         app.get("/messages", this::getMessageHandler);
+        app.get("/messages/{message_id}", this::getMessageHandler);
         app.post("/messages", this::postMessageHandler);
+        app.delete("/messages/{message_id}", this::deleteMessageHandler);
         return app;
     }
 
@@ -65,7 +67,15 @@ public class SocialMediaController {
      * @param context context object managing HTTP request and response.
      */
     private void getMessageHandler(Context context) throws JsonProcessingException {
-        context.status(200).json(messageService.getAllMessages());
+        // handle parameter *PATH*/{message_id}
+        if(!context.pathParam("message_id").isBlank()) {
+            Message response = messageService.getMessageById(context.pathParam("message_id"));
+
+            if (response == null) context.status(200).json("");
+            else context.status(200).json(response);
+        }
+        // no parameters
+        else context.status(200).json(messageService.getAllMessages());
     }
 
     /**
@@ -79,5 +89,16 @@ public class SocialMediaController {
 
         if(newMessage != null) context.status(200).json(mapper.writeValueAsString(newMessage));
         else context.status(400);
+    }
+
+    /**
+     * Handle DELETE calls to the messages end point.
+     * @param context context object managing HTTP request and response.
+     */
+    private void deleteMessageHandler(Context context) throws JsonProcessingException {
+        Message response = messageService.deleteMessageById(context.pathParam("message_id"));
+
+        if (response == null) context.status(200).json("");
+        else context.status(200).json(response);
     }
 }

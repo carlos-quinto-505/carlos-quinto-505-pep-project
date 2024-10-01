@@ -24,10 +24,20 @@ public class MessageService {
 
     /**
      * Contains methods used for querying Message records.
-     * @return a list of Message objects. 
+     * @return a list of Messages. 
      */
     public List<Message> getAllMessages() {
         return messageDAO.getMessagesAll();
+    }
+
+    /**
+     * Contains methods used for querying Message records.
+     * @return a Message. 
+     */
+    public Message getMessageById(String targetId) {
+        int id = Integer.valueOf(targetId).intValue();
+
+        return messageDAO.getMessageById(id);
     }
 
     /**
@@ -39,6 +49,19 @@ public class MessageService {
         if (textVerify(newMessage.getMessage_text()) && posterIdVerify(newMessage.getPosted_by())) {
             return messageDAO.insertMessage(newMessage.getPosted_by(), newMessage.getMessage_text(), newMessage.getTime_posted_epoch());
         }
+        else return null;
+    }
+
+    /**
+     * Contains methods used for processing and deleting Message records.
+     * @param id the Message containing the data for new record fields.
+     * @return a Message. When no deletions occur, return null. 
+     */
+    public Message deleteMessageById(String targetId) {
+        int id = Integer.valueOf(targetId).intValue();
+        Message target = messageDAO.getMessageById(id);
+        
+        if (messageDAO.deleteMessageById(id) > 0) return target;
         else return null;
     }
 

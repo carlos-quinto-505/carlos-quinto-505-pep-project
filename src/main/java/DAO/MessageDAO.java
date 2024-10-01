@@ -14,7 +14,7 @@ import java.util.List;
 public class MessageDAO {
     /**
      * Retrieve all existing messages.
-     * @return A List of Message objects.
+     * @return A List of Messages.
      */
     public List<Message> getMessagesAll() {
         Connection connection = ConnectionUtil.getConnection();
@@ -24,6 +24,28 @@ public class MessageDAO {
             PreparedStatement statement = connection.prepareStatement(sql);
             ResultSet results = statement.executeQuery();
             return messageQueryResultsBuilder(results);
+        } catch (SQLException e) {
+            System.out.println("SQL exception occurred: " + e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * Retrieve message by message_id field.
+     * @return a Message.
+     */
+    public Message getMessageById(int id) {
+        Connection connection = ConnectionUtil.getConnection();
+
+        try {
+            String sql = "SELECT * FROM message WHERE message_id=?;";
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setInt(1, id);
+
+            ResultSet results = statement.executeQuery();
+            List<Message> queryMessages = messageQueryResultsBuilder(results);
+            
+            if (!queryMessages.isEmpty()) return queryMessages.get(0);
         } catch (SQLException e) {
             System.out.println("SQL exception occurred: " + e.getMessage());
         }
@@ -61,6 +83,26 @@ public class MessageDAO {
             System.out.println("SQL exception occurred: " + e.getMessage());
         }
         return null;
+    }
+
+    /**
+     * Delete entry from message table.
+     * @param
+     * @return the processed Message.
+     */
+    public int deleteMessageById(int id) {
+        Connection connection = ConnectionUtil.getConnection();
+
+        try {
+            String sql = "DELETE FROM message WHERE message_id=?;";
+            PreparedStatement statement = connection.prepareStatement(sql);
+
+            statement.setInt(1, id);
+            return statement.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("SQL exception occurred: " + e.getMessage());
+        }
+        return 0;
     }
 
     /**
