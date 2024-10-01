@@ -13,19 +13,21 @@ import java.util.List;
  * @author C. Quinto
  */
 
-public class SocialMediaDAO {
+public class AccountDAO {
     /**
      * Retrieve existing accounts that match a provided username.
      * @param username String used to complete the SQL username query.
      * @return A List of Account objects.
      */
-    public List<Account> getAccountByUsername(String username) {
+    public Account getAccountByUsername(String username) {
         Connection connection = ConnectionUtil.getConnection();
         List<Account> accounts = new ArrayList<>();
 
         try {
             String sql = "SELECT * FROM account WHERE username=?;";
             PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setString(1, username);
+
             ResultSet results = statement.executeQuery();
 
             while (results.next()) {
@@ -37,12 +39,14 @@ public class SocialMediaDAO {
                 accounts.add(objAccount);
 
             }
+
+            if (accounts.isEmpty()) return null;
+            else return accounts.get(0);
         } catch (SQLException e) {
             System.out.println("SQL exception occurred: " + e.getMessage());
-            accounts.add(new Account("",""));
         }
 
-        return accounts;
+        return null;
     }
     
     /**
@@ -54,19 +58,18 @@ public class SocialMediaDAO {
         Connection connection = ConnectionUtil.getConnection();
 
         try {
+            Account objProspect = new Account();
             String sql = "INSERT INTO account (username, password) VALUES (?, ?);" ;
-            PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement statement = connection.prepareStatement(sql);
             
             statement.setString(1, username);
             statement.setString(2, password);
             statement.executeUpdate();
-
             
-            Account objProspect = new Account(username, password);
-
+            objProspect = getAccountByUsername(username);
             return objProspect;
-        } catch (Exception e) {
-            // TODO: handle exception
+        } catch (SQLException e) {
+            System.out.println("SQL exception occurred: " + e.getMessage());
         }
 
         return null;

@@ -1,7 +1,7 @@
 package Service;
 
 import Model.Account;
-import DAO.SocialMediaDAO;
+import DAO.AccountDAO;
 
 import java.util.List;
 
@@ -9,21 +9,21 @@ import java.util.List;
  * Logic-handling class
  * @author C. Quinto
  */
-public class SocialMediaService {
-    SocialMediaDAO socialMediaDAO;
+public class AccountService {
+    AccountDAO socialMediaDAO;
 
     /**
      * No-args constructor
      */
-    public SocialMediaService(){
-        socialMediaDAO = new SocialMediaDAO();
+    public AccountService(){
+        socialMediaDAO = new AccountDAO();
     }
 
     public Account addAccount(Account newAccount) {
         if (usernameVerify(newAccount.getUsername()) && passwordVerify(newAccount.getPassword())) {
-
+            return socialMediaDAO.insertNewAccount(newAccount.getUsername(), newAccount.getPassword());
         }
-        return null;
+        else return null;
     }
 
     private boolean passwordVerify(String password) {
@@ -36,9 +36,9 @@ public class SocialMediaService {
 
     private boolean usernameVerify(String username) {
         if (!username.isEmpty()) {
-            List<Account> accounts = socialMediaDAO.getAccountByUsername(username);
+            Account account = socialMediaDAO.getAccountByUsername(username);
 
-            if (!accounts.isEmpty() && accounts.get(0).getUsername() != username)
+            if (account == null)
             return true;
         }
 
