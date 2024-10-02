@@ -4,6 +4,7 @@ import Model.Message;
 import DAO.MessageDAO;
 import DAO.AccountDAO;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -35,9 +36,21 @@ public class MessageService {
      * @return a Message. 
      */
     public Message getMessageById(String targetId) {
-        int id = Integer.valueOf(targetId).intValue();
+        if (!targetId.isBlank()) {
+            Message result = messageDAO.getMessageById(Integer.valueOf(targetId).intValue());
 
-        return messageDAO.getMessageById(id);
+            return result;
+        }
+        return null;
+    }
+
+    public List<Message> getMessageByAccountId(String targetId) {
+        if (!targetId.isBlank()) {
+            List<Message> result = messageDAO.getMessageByAccountId(Integer.valueOf(targetId).intValue());
+
+            return result;
+        }
+        return Collections.emptyList();
     }
 
     /**
@@ -54,15 +67,33 @@ public class MessageService {
 
     /**
      * Contains methods used for processing and deleting Message records.
-     * @param id the Message containing the data for new record fields.
-     * @return a Message. When no deletions occur, return null. 
+     * @param id the message record id.
+     * @return a Message. When no deletions occur, return null.
      */
     public Message deleteMessageById(String targetId) {
         int id = Integer.valueOf(targetId).intValue();
-        Message target = messageDAO.getMessageById(id);
+        Message message = messageDAO.getMessageById(id);
         
-        if (messageDAO.deleteMessageById(id) > 0) return target;
+        if (messageDAO.deleteMessageById(id) > 0) return message;
         else return null;
+    }
+
+    /**
+     * Contains methods used for processing and patching Message records.
+     * @param id the Message containing the data for new record fields.
+     * @return a Message.
+     */
+    public Message patchMessageById(Message message, String targetId) {
+        if (!targetId.isBlank()) {
+            message.setMessage_id(Integer.valueOf(targetId).intValue());
+            Message existingTarget = messageDAO.getMessageById(message.getMessage_id());
+
+            if (textVerify(message.getMessage_text()) && existingTarget != null) {
+                messageDAO.patchMessageById(message.getMessage_id(), message.getMessage_text());
+                return messageDAO.getMessageById(message.getMessage_id());
+            }
+        }
+        return null;
     }
 
     /**
@@ -73,7 +104,11 @@ public class MessageService {
     private boolean textVerify(String text) {
         int maxCharCount = 255, minCharCount = 1;
 
-        if (text.length() >= minCharCount && text.length() <= maxCharCount) return true;
+        if (
+            !text.isBlank() &&
+            text.length() >= minCharCount &&
+            text.length() <= maxCharCount
+        ) return true;
         else return false;
     }
 

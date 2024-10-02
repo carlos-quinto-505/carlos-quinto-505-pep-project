@@ -29,8 +29,7 @@ public class AccountDAO {
             ResultSet results = statement.executeQuery();
             accounts = accountQueryResultsBuilder(results);
 
-            if (accounts.isEmpty()) return null;
-            else return accounts.get(0);
+            if (!accounts.isEmpty()) return accounts.get(0);
         } catch (SQLException e) {
             System.out.println("SQL exception occurred: " + e.getMessage());
         }
@@ -38,7 +37,7 @@ public class AccountDAO {
     }
 
     /**
-     * Retrieve existing accounts that match a provided username.
+     * Retrieve existing account that match a provided username.
      * @param username String used to complete the SQL username query.
      * @return an Account.
      */
@@ -54,8 +53,7 @@ public class AccountDAO {
             ResultSet results = statement.executeQuery();
             accounts = accountQueryResultsBuilder(results);
 
-            if (accounts.isEmpty()) return null;
-            else return accounts.get(0);
+            if (!accounts.isEmpty()) return accounts.get(0);
         } catch (SQLException e) {
             System.out.println("SQL exception occurred: " + e.getMessage());
         }
@@ -63,7 +61,7 @@ public class AccountDAO {
     }
 
     /**
-     * Retrieve existing accounts that match a provided username and password.
+     * Retrieve existing account that match a provided username and password.
      * @param username String used to complete the SQL username query.
      * @param password String used to complete the SQL password query.
      * @return an Account.
